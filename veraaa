@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERA Personal Branding Report</title>
+    <!-- FontAwesome 아이콘 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #1a1c24 0%, #090a0f 100%);
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            overflow-x: hidden;
+        }
+
+        /* 상단 헤더 */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 24px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .badge {
+            background-color: #FFC700;
+            color: #000;
+            font-weight: 800;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        .title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            letter-spacing: 0.5px;
+        }
+
+        /* 메인 뷰포트 (1페이지 전용 3D 스테이지) */
+        .viewport {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            padding: 20px;
+        }
+
+        .book-stage {
+            position: relative;
+            width: 440px;
+            height: 622px;
+            perspective: 2000px;
+        }
+
+        /* 각 페이지 카드 */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background-color: #121318;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08) inset;
+            overflow: hidden;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 0.95s cubic-bezier(0.15, 0.85, 0.35, 1.2), 
+                        opacity 0.5s ease 0.3s,
+                        filter 0.8s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 3D 넘김 모션 */
+        .page.flipped {
+            transform: rotateY(-135deg) scale(0.92) skewY(-2deg);
+            opacity: 0;
+            pointer-events: none;
+            filter: brightness(0.4);
+        }
+
+        /* 이미지 등장 애니메이션 (줌인 + 렌즈효과) */
+        .page img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.94) translateY(10px);
+            filter: blur(4px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .page.active img {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            filter: blur(0);
+            transition-delay: 0.2s;
+        }
+
+        /* 종이 표면 빛반사 애니메이션 */
+        .page::after {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: linear-gradient(
+                135deg, 
+                rgba(255,255,255,0) 0%, 
+                rgba(255,255,255,0.03) 45%, 
+                rgba(255,255,255,0.15) 50%, 
+                rgba(255,255,255,0) 55%
+            );
+            pointer-events: none;
+            transform: rotate(-30deg);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .page.active::after {
+            opacity: 1;
+            animation: shineSweep 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.3s;
+        }
+
+        @keyframes shineSweep {
+            0% { transform: translateY(-50%) rotate(-30deg); }
+            100% { transform: translateY(50%) rotate(-30deg); }
+        }
+
+        /* 제본선 입체 그림자 */
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 30px;
+            background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%);
+            z-index: 10;
+        }
+
+        /* 사이드 화살표 버튼 */
+        .side-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 50;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .side-btn:hover {
+            background: #FFC700;
+            color: #000;
+            box-shadow: 0 0 15px rgba(255, 199, 0, 0.4);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .side-btn.prev { left: calc(50% - 290px); }
+        .side-btn.next { right: calc(50% - 290px); }
+
+        /* 하단 컨트롤 데크 */
+        .bottom-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 24px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .control-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 0.95rem;
+            cursor: pointer;
+            padding: 6px 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        .control-btn:hover {
+            color: #FFC700;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .page-counter {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #FFC700;
+            min-width: 70px;
+            text-align: center;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 199, 0, 0.2);
+        }
+
+        @media (max-height: 800px) {
+            .book-stage { width: 370px; height: 523px; }
+            .side-btn.prev { left: calc(50% - 240px); }
+            .side-btn.next { right: calc(50% - 240px); }
+        }
+
+        @media (max-width: 600px) {
+            .book-stage { width: 88vw; height: 124vw; }
+            .side-btn.prev { left: 10px; }
+            .side-btn.next { right: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <span class="badge">VERA</span>
+        <span class="title">PERSONAL BRANDING REPORT</span>
+    </header>
+
+    <div class="viewport">
+        <button class="side-btn prev" id="prevBtn" title="이전 페이지"><i class="fa-solid fa-chevron-left"></i></button>
+
+        <div class="book-stage">
+            <div class="page" id="p1"><img src="./1page.jpg" alt="01페이지"></div>
+            <div class="page" id="p2"><img src="./2page.jpg" alt="02페이지"></div>
+            <div class="page" id="p3"><img src="./3page.jpg" alt="03페이지"></div>
+            <div class="page" id="p4"><img src="./4page.jpg" alt="04페이지"></div>
+            <div class="page" id="p5"><img src="./5page.jpg" alt="05페이지"></div>
+            <div class="page" id="p6"><img src="./6page.jpg" alt="06페이지"></div>
+            <div class="page" id="p7"><img src="./7page.jpg" alt="07페이지"></div>
+            <div class="page" id="p8"><img src="./8page.jpg" alt="08페이지"></div>
+        </div>
+
+        <button class="side-btn next" id="nextBtn" title="다음 페이지"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="control-btn" id="firstBtn"><i class="fa-solid fa-backward-step"></i></button>
+        <button class="control-btn" id="prevControlBtn"><i class="fa-solid fa-arrow-left"></i> 이전</button>
+        
+        <div class="page-counter" id="pageCounter">1 / 8</div>
+
+        <button class="control-btn" id="nextControlBtn">다음 <i class="fa-solid fa-arrow-right"></i></button>
+        <button class="control-btn" id="lastBtn"><i class="fa-solid fa-forward-step"></i></button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const pages = document.querySelectorAll('.page');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevControlBtn = document.getElementById('prevControlBtn');
+            const nextControlBtn = document.getElementById('nextControlBtn');
+            const firstBtn = document.getElementById('firstBtn');
+            const lastBtn = document.getElementById('lastBtn');
+            const pageCounter = document.getElementById('pageCounter');
+
+            let currentPage = 0;
+
+            function updateBook() {
+                pages.forEach((page, index) => {
+                    if (index < currentPage) {
+                        page.classList.add('flipped');
+                        page.classList.remove('active');
+                        page.style.zIndex = index;
+                    } else if (index === currentPage) {
+                        page.classList.remove('flipped');
+                        page.classList.add('active');
+                        page.style.zIndex = pages.length;
+                    } else {
+                        page.classList.remove('flipped');
+                        page.classList.remove('active');
+                        page.style.zIndex = pages.length - index;
+                    }
+                });
+                pageCounter.textContent = `${currentPage + 1} / ${pages.length}`;
+            }
+
+            function flipNext() {
+                if (currentPage < pages.length - 1) {
+                    currentPage++;
+                    updateBook();
+                }
+            }
+
+            function flipPrev() {
+                if (currentPage > 0) {
+                    currentPage--;
+                    updateBook();
+                }
+            }
+
+            nextBtn.addEventListener('click', flipNext);
+            prevBtn.addEventListener('click', flipPrev);
+            nextControlBtn.addEventListener('click', flipNext);
+            prevControlBtn.addEventListener('click', flipPrev);
+
+            firstBtn.addEventListener('click', () => {
+                currentPage = 0;
+                updateBook();
+            });
+
+            lastBtn.addEventListener('click', () => {
+                currentPage = pages.length - 1;
+                updateBook();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') flipNext();
+                if (e.key === 'ArrowLeft') flipPrev();
+            });
+
+            updateBook();
+        });
+    </script>
+</body>
+</html>
